@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Mesa de electrónica interactiva para girar una protoboard 3D, montar circuitos y resolver retos.">
+<title>Circuito Nueve · Protoboard 3D</title>
+<style>
+:root{--ink:#182e3c;--dim:#506573;--accent:#08755d;--mint:#a7f5d7;--line:#dce8ea;--paper:#edf4f3;--night:#142635}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 system-ui,sans-serif}button,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #3598d3;outline-offset:3px}button:disabled{cursor:default;opacity:.53}a{color:inherit;text-decoration:none}[hidden]{display:none!important}
+.wrap{width:min(1270px,calc(100% - 48px));margin:auto}.header{background:#fff;border-bottom:1px solid var(--line)}.nav{height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-weight:850;font-size:21px;display:flex;align-items:center;gap:3px;letter-spacing:-.75px}.brand>span:last-child{color:var(--accent)}.mark{display:grid;place-items:center;background:var(--mint);height:33px;width:33px;border-radius:9px;font-size:26px;color:#104b40;margin-right:7px}.grade,.challenge-tag{font:750 11px/1.4 ui-monospace,monospace;letter-spacing:.08em;color:var(--accent)}
+.bench{margin-top:17px;background:#fff;border:1px solid #d6e4e5;border-radius:16px;overflow:hidden;box-shadow:0 9px 25px #17354213}.bench-head{padding:10px 17px;display:flex;justify-content:space-between;align-items:center;gap:10px}.bench-head h1{font-size:clamp(20px,2.2vw,29px);letter-spacing:-.055em;margin:0;white-space:nowrap}.bench-head h1 span{color:var(--accent)}.lessons,.view,.tools,.actions,.tool-detail{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.lessons button,.tools button,.actions button,.tool-detail button,.challenge button{padding:7px 11px;background:#f6f9fa;border:1px solid var(--line);border-radius:7px;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap}.lessons button[aria-pressed=true],.tools button[aria-pressed=true]{border-color:#86cdb7;background:#dff8ee;color:#075944}.lessons button:hover,.tools button:hover,.actions button:not(:disabled):hover,.challenge button:hover{border-color:#7eb5a8}
+.scene{background-color:var(--night);background-image:radial-gradient(ellipse at 50% 48%,#32506380,transparent 66%),radial-gradient(#526c7a 1px,transparent 1px);background-size:100% 100%,20px 20px;color:#e3eef1}.scene-top,.scene-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 14px}.scene-top{border-bottom:1px solid #4f647460}.view button,.power{min-height:33px;border-radius:7px;padding:5px 9px;font-size:12px;font-weight:750;white-space:nowrap}.view button{color:#e4eff2;background:#263e4d;border:1px solid #57717f}.view button[aria-pressed=true],.view button:hover{background:#9bf1d1;color:#133c33;border-color:#9bf1d1}.power{background:#b0f7d9;color:#10483a;border:1px solid #9feacb}.power span{font-size:16px;margin-right:3px}.power[aria-pressed=true]{background:#20513f;color:#e0ffef;border-color:#61967f}
+.viewport{position:relative}.viewport svg{display:block;width:100%;height:clamp(330px,54vh,540px);user-select:none;cursor:grab;touch-action:pan-y}.viewport svg.orbit{touch-action:none}.viewport svg.drag{cursor:grabbing;touch-action:none}.viewport svg.orbit .hole,.viewport svg.orbit .piece{pointer-events:none}.hole{cursor:crosshair;outline:none}.hole:hover .socket,.hole:focus-visible .socket{stroke:#00a879;stroke-width:3.2}.hole.ghost .socket{stroke:#11a681;stroke-width:3}.hole.chosen .socket{stroke:#00b78a;stroke-width:4}.piece{pointer-events:none}.piece.interactive{pointer-events:auto;cursor:pointer;outline:none}.piece.interactive:hover .hit,.piece.interactive:focus-visible .hit,.piece.selected .hit{stroke:#00bc9099}.piece .hit{stroke-linecap:round}
+.scene-bottom{background:#1b3241;border-top:1px solid #4f647460;font-size:12px;min-height:40px}.scene-bottom label{display:flex;align-items:center;gap:5px;white-space:nowrap}.scene-bottom input{accent-color:#65e5bb}.scene-bottom #feedback{font-weight:750;text-align:right}.scene-bottom .warn{color:#ffd18d}.scene-bottom .ok{color:#a8ffdc}
+.toolbox{padding:9px 14px 6px}.tool-row{display:flex;justify-content:space-between;align-items:center;gap:7px}.tools button{display:flex;align-items:center;gap:5px}.symbol{width:18px;text-align:center;color:#08755d;font-size:17px;line-height:1}.symbol.led{color:#b63242}.symbol.res{color:#895523}.actions button{background:#fff}.tool-detail{min-height:28px;margin-top:5px;color:var(--dim);font-size:12px}.tool-detail p{margin:0}.tool-detail select{background:#fff;border:1px solid #a8c3c3;border-radius:4px;color:var(--ink);padding:3px 5px;font:inherit}.tool-detail button{padding:4px 7px;font-size:12px}.tool-detail button[aria-pressed=true]{border-color:#86cdb7;background:#dff8ee;color:#075944}#inspector{display:flex;flex-wrap:wrap;gap:5px;align-items:center;width:100%;border-top:1px solid var(--line);padding-top:6px;margin-bottom:3px}#inspector strong{margin-right:5px}
+.challenge{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 10px;border-top:1px solid var(--line);background:#f4faf8;padding:8px 14px}.challenge p{margin:0;font-size:13px}.challenge-tag{background:#dcf4ea;border-radius:4px;padding:3px 6px;white-space:nowrap}.challenge button{background:#fff;padding:4px 8px;font-size:12px}.challenge #hint{grid-column:2 / -1;color:var(--dim)}.teaching{color:var(--dim);margin:12px 0 26px;font-size:13px}.teaching summary{cursor:pointer;font-weight:750;color:var(--accent)}.teaching p{margin:6px 0;max-width:70ch}
+@media(max-width:700px){.wrap{width:calc(100% - 20px)}.nav{height:48px}.grade{font-size:9px}.bench{margin-top:9px}.bench-head{align-items:flex-start;flex-direction:column;padding:8px 10px;gap:5px}.lessons button,.tools button,.actions button{font-size:12px;padding:5px 7px}.scene-top,.scene-bottom{padding:7px 9px}.viewport svg{height:clamp(270px,47vh,440px)}.toolbox{padding:8px 9px 5px}.tool-row{align-items:flex-start;flex-wrap:wrap}.challenge{padding:7px 9px}.challenge p{font-size:12px}}
+#zoom{display:none}
+@media(max-width:700px){#zoom{display:inline-block}.viewport.zoomed{overflow-x:auto}.viewport.zoomed svg{width:max(100%,650px);height:350px;touch-action:auto}.viewport.zoomed svg.orbit,.viewport.zoomed svg.drag{touch-action:none}}
+
+</style>
+
+</head>
+<body>
+<header class="header"><div class="wrap nav">
+<a class="brand" href="#"><span class="mark" aria-hidden="true">ϟ</span> Circuito<span>Lab</span></a>
+<span class="grade">LABORATORIO DE ELECTRÓNICA · 9°</span>
+</div></header>
+<main class="wrap">
+<section class="bench" aria-labelledby="title">
+<div class="bench-head"><h1 id="title">Protoboard <span>3D</span></h1><div id="lessons" class="lessons" aria-label="Actividades"></div></div>
+<div class="scene">
+  <div class="scene-top">
+    <div class="view" aria-label="Controles de cámara">
+      <button id="orbit" type="button" aria-pressed="false" title="Gira también con las flechas del teclado"><span aria-hidden="true">↻</span> Girar</button>
+      <button id="top" type="button" aria-pressed="false"><span aria-hidden="true">▤</span> Desde arriba</button>
+      <button id="zoom" type="button" aria-pressed="false" aria-label="Ampliar placa" title="Ampliar placa">＋</button>
+      <button id="reset-view" type="button" aria-label="Restaurar vista" title="Restaurar vista"><span aria-hidden="true">⌂</span></button>
+    </div>
+    <button id="power" class="power" type="button" aria-pressed="false"><span aria-hidden="true">⏻</span> <b>Encender 5 V</b></button>
+  </div>
+  <div class="viewport"><svg id="board" viewBox="0 0 800 420" role="group" aria-label="Protoboard tridimensional interactiva"></svg></div>
+  <div class="scene-bottom"><label><input id="internals" type="checkbox"> Ver conexiones internas</label><div id="feedback" role="status"></div></div>
+</div>
+<div class="toolbox">
+  <div class="tool-row"><div id="tools" class="tools" aria-label="Herramientas y componentes"></div>
+  <div class="actions"><button id="undo" type="button" title="Deshacer último cambio"><span aria-hidden="true">↶</span> Deshacer</button><button id="clear" type="button">Vaciar</button></div></div>
+  <div class="tool-detail">
+    <p id="selection" role="status"></p>
+    <label id="res-options" hidden>Resistencia <select id="res-value"><option value="220">220 Ω</option><option value="330" selected>330 Ω</option><option value="1000">1 kΩ</option></select></label>
+    <div id="inspector" hidden></div>
+  </div>
+</div>
+<div class="challenge"><span id="challenge-tag" class="challenge-tag">RETO</span><p id="lesson"></p><button id="hint-button" type="button" aria-expanded="false" aria-controls="hint">Pista</button><p id="hint" hidden></p></div>
+</section>
+<details class="teaching"><summary>En clase</summary><p>Antes de encender la fuente, pide una predicción. Después, cambia una sola conexión o el valor de la resistencia y compara la corriente. Usa <b>Probar unión</b> para investigar qué orificios comparten el mismo contacto interno.</p><p>La fuente virtual es de 5 V y el LED usa un modelo simplificado. En un montaje físico, apaga la fuente antes de cambiar conexiones.</p></details>
+</main>
+<script>
+const CircuitCore = (() => {
+
+const rows = [
+  ['P', 17], ['N', 39], ['A', 73], ['B', 94], ['C', 115], ['D', 136], ['E', 157],
+  ['F', 194], ['G', 215], ['H', 236], ['I', 257], ['J', 278], ['Q', 312], ['M', 334]
+];
+const columns = 16;
+const nodeOf = (id) => {
+  const row = id[0];
+  if ('PNQMX'.includes(row)) return row === 'X' ? id : row;
+  return ('ABCDE'.includes(row) ? 'U' : 'L') + id.slice(1);
+};
+
+function linearSolve(matrix, rhs) {
+  const n = rhs.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const ratio = matrix[j][i] / matrix[i][i];
+      for (let k = i + 1; k < n; k++) matrix[j][k] -= ratio * matrix[i][k];
+      rhs[j] -= ratio * rhs[i];
+    }
+  }
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = i + 1; j < n; j++) rhs[i] -= matrix[i][j] * rhs[j];
+    rhs[i] /= matrix[i][i];
+  }
+  return rhs;
+}
+
+function simulate(parts, powered) {
+  const leds = parts.filter((part) => part.type === 'led');
+  if (!powered) return { mode: 'off', current: 0, leds: new Map() };
+  const parents = new Map();
+  function root(id) {
+    if (!parents.has(id)) parents.set(id, id);
+    if (parents.get(id) !== id) parents.set(id, root(parents.get(id)));
+    return parents.get(id);
+  }
+  for (const part of parts) {
+    if (part.type === 'wire' || (part.type === 'switch' && part.closed)) {
+      parents.set(root(nodeOf(part.a)), root(nodeOf(part.b)));
+    }
+  }
+  const plus = root('X+');
+  const minus = root('X-');
+  if (plus === minus) return { mode: 'short', current: 0, leds: new Map() };
+  const branches = parts.filter(({type}) => type === 'led' || type === 'res').map((part) => ({
+    part, a: root(nodeOf(part.a)), b: root(nodeOf(part.b)),
+    threshold: part.type === 'led' ? 2 : 0,
+    resistance: part.type === 'led' ? 5 : part.value
+  }));
+  const unknown = [...new Set(branches.flatMap(({a,b}) => [a,b]))].filter((id) => id !== plus && id !== minus);
+  const lookup = new Map(unknown.map((id, index) => [id, index]));
+  const voltage = (id, values) => id === plus ? 5 : id === minus ? 0 : values[lookup.get(id)];
+  const amps = (branch, drop) => (branch.threshold ? Math.max(0, drop - branch.threshold) : drop) / branch.resistance;
+  const leakage = 1e-9;
+  const energy = (values) => branches.reduce((sum, branch) => {
+    const current = amps(branch, voltage(branch.a, values) - voltage(branch.b, values));
+    return sum + current * current * branch.resistance / 2;
+  }, values.reduce((sum, value) => sum + leakage * value * value / 2, 0));
+  let values = unknown.map(() => 0);
+  for (let step = 0; step < 60 && unknown.length; step++) {
+    const matrix = unknown.map((_, i) => unknown.map((_, j) => i === j ? leakage : 0));
+    const residual = values.map((value) => leakage * value);
+    for (const branch of branches) {
+      if (branch.a === branch.b) continue;
+      const a = lookup.get(branch.a);
+      const b = lookup.get(branch.b);
+      const drop = voltage(branch.a, values) - voltage(branch.b, values);
+      const current = amps(branch, drop);
+      const conductance = !branch.threshold || drop >= branch.threshold ? 1 / branch.resistance : 0;
+      if (a !== undefined) {
+        residual[a] += current;
+        matrix[a][a] += conductance;
+      }
+      if (b !== undefined) {
+        residual[b] -= current;
+        matrix[b][b] += conductance;
+      }
+      if (a !== undefined && b !== undefined) {
+        matrix[a][b] -= conductance;
+        matrix[b][a] -= conductance;
+      }
+    }
+    if (Math.max(...residual.map(Math.abs)) < 1e-8) break;
+    const direction = linearSolve(matrix, residual.map((value) => -value));
+    const baseline = energy(values);
+    let scale = Math.min(1, 5 / Math.max(...direction.map(Math.abs)));
+    while (scale > 1e-15) {
+      const next = values.map((value, i) => value + scale * direction[i]);
+      if (energy(next) <= baseline) {
+        values = next;
+        break;
+      }
+      scale /= 2;
+    }
+    if (scale <= 1e-15) break;
+  }
+  const readings = new Map();
+  let current = 0;
+  for (const branch of branches) {
+    const drop = voltage(branch.a, values) - voltage(branch.b, values);
+    const branchCurrent = amps(branch, drop);
+    if (branch.a === plus) current += branchCurrent;
+    if (branch.b === plus) current -= branchCurrent;
+    if (branch.part.type === 'led') readings.set(branch.part.id, { current: branchCurrent, reversed: drop < -0.05 });
+  }
+  const lit = [...readings.values()].some((reading) => reading.current > .00015);
+  const overload = [...readings.values()].some((reading) => reading.current > .02);
+  return { mode: overload ? 'overload' : lit ? 'lit' : current > .00001 ? 'flow' : 'open', current, leds: readings, count: leds.length };
+}
+
+return { rows, columns, nodeOf, simulate };
+})();
+const CircuitModel = (() => {
+const {rows,columns,nodeOf}=CircuitCore;
+
+const columnX = (col) => 37 + 26 * (col - 1);
+const holeList = rows.flatMap(([row,y]) => Array.from({length:columns}, (_,i) => ({
+  id:row+(i+1), x:columnX(i+1), y,
+  label:('PQ'.includes(row) ? '+' : 'NM'.includes(row) ? '−' : row)+(i+1),
+  name:('PNQM'.includes(row) ? 'Riel '+('PN'.includes(row) ? 'superior ' : 'inferior ')+('PQ'.includes(row) ? 'positivo ' : 'negativo ') : row)+(i+1)
+})));
+holeList.push({id:'X+',x:-41,y:111,label:'+ fuente',name:'Terminal positivo de la fuente'},
+  {id:'X-',x:-41,y:239,label:'− fuente',name:'Terminal negativo de la fuente'});
+const holes = new Map(holeList.map((hole) => [hole.id,hole]));
+const board = document.querySelector('#board');
+const num = (n) => n.toFixed(2);
+const palette = ['#fb676b','#507ff3','#14bd9a','#8b67d7','#e79227'];
+const svgDefs = `<defs>
+<linearGradient id="plastic" x2="0.8" y2="1"><stop stop-color="#fcffff"/><stop offset="1" stop-color="#d7e2e3"/></linearGradient>
+<linearGradient id="battery" x2="1" y2="1"><stop stop-color="#527585"/><stop offset="1" stop-color="#294757"/></linearGradient>
+<radialGradient id="lit"><stop stop-color="#fff1b1"/><stop offset=".42" stop-color="#ff7765"/><stop offset="1" stop-color="#d6233d"/></radialGradient>
+<radialGradient id="dark"><stop stop-color="#f07b7d"/><stop offset="1" stop-color="#8c2538"/></radialGradient>
+<filter id="halo" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6"/></filter>
+</defs>`;
+
+function renderModel({ yaw, tilt, top, orbit, internals, parts, pending, cursor, result, tool, powered, active, moving }) {
+  const theta = top ? 0 : yaw;
+  const inclination = top ? Math.PI / 2 : tilt;
+  const cos = Math.cos(theta), sin = Math.sin(theta);
+  const raw = (x,y,z=0) => [
+    x*cos-y*sin,
+    (x*sin+y*cos)*Math.sin(inclination)-z*Math.cos(inclination)
+  ];
+  const bounds = [[-1,-1],[464,-1],[464,351],[-1,351],[-135,75],[-24,75],[-24,274],[-135,274]]
+    .flatMap(([x,y])=>[raw(x,y,-22),raw(x,y,25)]);
+  const xs=bounds.map(([x])=>x), ys=bounds.map(([,y])=>y);
+  const left=Math.min(...xs), right=Math.max(...xs), upper=Math.min(...ys), lower=Math.max(...ys);
+  const width = 800;
+  const height = board.clientHeight * width / Math.max(1,board.clientWidth) || 420;
+  const scale = Math.min((width-63)/(right-left),(height-33)/(lower-upper),1.38);
+  const project = (x,y,z=0) => {
+    const [px,py]=raw(x,y,z);
+    return [width/2+(px-(left+right)/2)*scale,height/2+(py-(upper+lower)/2)*scale];
+  };
+  board.setAttribute('viewBox','0 0 '+width+' '+height);
+  const point = (...v) => project(...v).map(num).join(',');
+  const polygon = (points, attrs) => '<polygon points="'+points.map(v=>point(...v)).join(' ')+'" '+attrs+'/>';
+  const line = (a,b,attrs) => '<path d="M'+point(...a)+'L'+point(...b)+'" '+attrs+'/>';
+  function box(x1,y1,x2,y2,h,fill,side) {
+    const corners = [[x1,y1],[x2,y1],[x2,y2],[x1,y2]];
+    const shadow = polygon(corners.map(([x,y])=>[x+3,y+7,-h-5]),'fill="#081621" opacity=".5"');
+    const walls = corners.map(([x,y],i)=>{
+      const [nextX,nextY] = corners[(i+1)%4];
+      return project(nextX,nextY)[0] < project(x,y)[0]
+        ? polygon([[x,y],[nextX,nextY],[nextX,nextY,-h],[x,y,-h]],'fill="'+side+'" stroke="#738890" stroke-width=".6"')
+        : '';
+    }).join('');
+    return shadow+walls+polygon(corners,'fill="'+fill+'" stroke="#a2b5b9" stroke-width="1" stroke-linejoin="round"');
+  }
+  function label(x,y,value,color='#526773',size=9) {
+    return '<text x="'+num(project(x,y)[0])+'" y="'+num(project(x,y)[1])+'" aria-hidden="true" dominant-baseline="central" text-anchor="middle" fill="'+color+'" font-size="'+size+'" font-weight="700" font-family="monospace" pointer-events="none">'+value+'</text>';
+  }
+  let scene = svgDefs+box(-1,-1,464,351,17,'url(#plastic)','#a0b4ba')+box(-135,75,-24,274,13,'url(#battery)','#253e4d');
+  scene += polygon([[12,169],[453,169],[453,183],[12,183]],'fill="#9aafb8" opacity=".74"');
+  scene += polygon([[14,172],[451,172],[451,179],[14,179]],'fill="#738b99" opacity=".77"');
+  for (const [y,color] of [[5,'#dc646a'],[51,'#6687cd'],[300,'#dc646a'],[345,'#6687cd']]) {
+    scene += line([23,y],[441,y],'stroke="'+color+'" stroke-width="1.6" opacity=".85"');
+  }
+  scene += label(-92,155,'FUENTE','#e2f7f7',10)+label(-92,181,'5 V',powered?'#9bf8cc':'#fff',24)+label(-91,210,powered?'ENCENDIDA':'APAGADA','#d3e3e7',8);
+  for (const [row,y] of rows) {
+    const letter = 'PQ'.includes(row)?'+':'NM'.includes(row)?'−':row;
+    const color = letter==='+'?'#a42e3c':letter==='−'?'#2c5a9c':undefined;
+    scene += label(14,y,letter,color)+label(451,y,letter,color);
+  }
+  for(let i=1;i<=columns;i++) scene += label(columnX(i),60,i)+label(columnX(i),291,i);
+  if (internals) {
+    for (let i=1;i<=columns;i++) {
+      const x=columnX(i);
+      scene += line([x,73],[x,157],'stroke="#13a990" stroke-width="5" opacity=".44"');
+      scene += line([x,194],[x,278],'stroke="#13a990" stroke-width="5" opacity=".44"');
+    }
+    for(const [y,color] of [[17,'#ed6573'],[39,'#588df1'],[312,'#ed6573'],[334,'#588df1']]) {
+      scene += line([37,y],[427,y],'stroke="'+color+'" stroke-width="5" opacity=".55"');
+    }
+  }
+  const taken = new Set(parts.flatMap(({a,b})=>[a,b]));
+  const group = pending && tool==='probe' && nodeOf(pending);
+  for(const {id,x,y,name} of holeList) {
+    const [cx,cy]=project(x,y);
+    const source=id.startsWith('X');
+    const chosen=id===pending ? ' chosen' : group===nodeOf(id) ? ' ghost' : '';
+    const terminalColor = id==='X+' ? '#df515c' : '#537fce';
+    scene += '<g class="hole'+chosen+'" data-hole="'+id+'" role="button" tabindex="'+(!orbit&&cursor===id?'0':'-1')+'" aria-label="'+name+(taken.has(id)?', ocupado':'')+'"><title>'+name+'</title><g transform="translate('+num(cx)+' '+num(cy)+')"><circle r="'+(source?14:10)+'" fill="transparent"/>';
+    if(source) scene += '<circle r="11" fill="'+terminalColor+'" stroke="#d1e1e6"/>';
+    scene += '<rect class="socket" x="-4" y="-3.6" width="8" height="7.2" rx="1.6" fill="'+(taken.has(id)?'#82a49f':'#324753')+'" stroke="#a4b9be" stroke-width="1"/>';
+    if(source) scene += '<text x="-19" y="4" text-anchor="middle" fill="white" font-size="13" font-weight="bold" pointer-events="none">'+(id==='X+'?'+':'−')+'</text>';
+    scene += '</g></g>';
+  }
+  for(const part of parts) {
+    const start=holes.get(part.a), end=holes.get(part.b);
+    const mid=[(start.x+end.x)/2,(start.y+end.y)/2,part.type==='wire'?15:22];
+    const a=project(start.x,start.y), b=project(end.x,end.y), center=project(...mid);
+    const guidePoints = part.type === 'wire' ? [a,center,b] : [a,[center[0]+(a[0]-b[0])*.26,center[1]+(a[1]-b[1])*.26],[center[0]+(b[0]-a[0])*.26,center[1]+(b[1]-a[1])*.26],b];
+    const path = part.type === 'wire' ? 'M'+a.join(',')+'Q'+center.join(',')+' '+b.join(',') : 'M'+guidePoints.map(p=>p.join(',')).join('L');
+    const angle=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;
+    const name = {wire:'Cable',res:'Resistencia de '+part.value+' ohmios',led:'LED',switch:'Interruptor '+(part.closed?'cerrado':'abierto')}[part.type];
+    const interactive = !moving && (tool==='edit' || (part.type==='switch' && tool!=='probe'));
+    scene += '<g data-part="'+part.id+'" class="piece '+(interactive?'interactive':'')+(part.id===active?' selected':'')+'" '+(interactive?'role="button" tabindex="'+(orbit?'-1':'0')+'"':'')+' aria-label="'+name+', '+start.name+' a '+end.name+'"><title>'+name+' · '+start.label+' → '+end.label+'</title>';
+    if(part.type==='wire') {
+      scene += '<path d="'+path+'" fill="none" stroke="#102c39" stroke-opacity=".42" stroke-width="8" stroke-linecap="round"/><path d="'+path+'" fill="none" stroke="'+palette[part.id%palette.length]+'" stroke-width="5" stroke-linecap="round"/>';
+    } else {
+      scene += '<path d="'+path+'" fill="none" stroke="#6b8090" stroke-width="3"/>';
+      scene += '<g transform="translate('+center.join(' ')+') rotate('+angle+')">';
+      if(part.type==='res') {
+        const bands = {220:['#b43a39','#b43a39','#784020'],330:['#d17a29','#d17a29','#784020'],1000:['#784020','#313a3e','#b43a39']}[part.value];
+        scene += '<rect x="-17" y="-7" width="34" height="14" rx="6" fill="#e4c396" stroke="#815f3e"/>'+[...bands,'#958138'].map((color,i)=>'<path d="M'+[-10,-4,2,11][i]+' -6v12" stroke="'+color+'" stroke-width="3"/>').join('');
+      }
+      if(part.type==='led') {
+        const reading=result.leds.get(part.id);
+        const current=reading?.current||0;
+        if(current>.00015&&current<=.02) scene += '<circle r="'+(13+Math.min(current*1000,12))+'" fill="#ff665b" opacity=".75" filter="url(#halo)"/>';
+        scene += '<circle r="10" fill="url(#'+(current>.00015&&current<=.02?'lit':'dark')+')" stroke="#752a3d" stroke-width="1.4"/><circle cx="-3" cy="-3" r="2.4" fill="#fff" opacity=".7"/><circle cx="-14" cy="0" r="2.8" fill="#fff1c4" stroke="#8c3b43"/>';
+      }
+      if(part.type==='switch') {
+        scene += '<rect x="-16" y="-10" width="32" height="20" rx="4" fill="#324957" stroke="#172632"/><circle cx="-10" r="3" fill="#dfe6eb"/><circle cx="10" r="3" fill="#dfe6eb"/><path d="M-10 0L'+(part.closed?'10 0':'7 -7')+'" stroke="'+(part.closed?'#73e5bc':'#f5c477')+'" stroke-width="3" stroke-linecap="round"/>';
+      }
+      scene += '</g>';
+      if(part.type==='led') {
+        const signX=center[0]+Math.cos(angle*Math.PI/180)*-21;
+        const signY=center[1]+Math.sin(angle*Math.PI/180)*-21;
+        scene += '<text x="'+signX+'" y="'+(signY-5)+'" text-anchor="middle" fill="#782534" stroke="#f3eeee" stroke-width="2" paint-order="stroke" font-family="monospace" font-size="12" font-weight="bold" aria-hidden="true">+</text>';
+      }
+    }
+    const hitPath = tool==='edit' || part.type==='wire' ? path : 'M'+guidePoints[1].join(',')+'L'+guidePoints[2].join(',');
+    if(interactive) scene += '<path class="hit" d="'+hitPath+'" fill="none" stroke="transparent" stroke-width="17"/>';
+    scene += '</g>';
+  }
+  const focused=document.activeElement;
+  const focusHole=focused?.dataset?.hole;
+  const focusPart=focused?.dataset?.part;
+  board.innerHTML=scene;
+  if(focusHole) board.querySelector('[data-hole="'+focusHole+'"]')?.focus({preventScroll:true});
+  if(focusPart) board.querySelector('[data-part="'+focusPart+'"]')?.focus({preventScroll:true});
+}
+
+return { holes, renderModel };
+})();
+const CircuitLessons = (() => {
+
+const part = (type,a,b,extra={}) => ({type,a,b,...extra});
+const feed = [part('wire','X+','P1'),part('wire','X-','N1'),part('wire','P4','A4')];
+const basic = [...feed,part('res','C4','C8',{value:330}),part('led','D8','D11'),part('wire','A11','N11')];
+
+const lessons = {
+  led: {
+    label:'Primer LED',
+    prompt:'Enciende la fuente. ¿Qué pasa con la corriente si aumentas la resistencia?',
+    hint:'Selecciona Editar, toca la resistencia y cambia de 330 Ω a 1 kΩ. Compara las lecturas en mA.',
+    sample:basic
+  },
+  repair: {
+    label:'Reparar LED',
+    prompt:'Este LED quedó al revés. Corrige el montaje hasta que encienda.',
+    hint:'Selecciona Editar, toca el LED y pulsa Invertir LED. El símbolo + señala el ánodo.',
+    sample:basic.map((p)=>p.type==='led'?{...p,a:p.b,b:p.a}:p),
+    goal:(result)=>result.mode==='lit'
+  },
+  switch: {
+    label:'Interruptor',
+    prompt:'Enciende la fuente y toca el interruptor. Compara los estados abierto y cerrado.',
+    hint:'El LED solo recibe corriente cuando hay un camino completo. La palanca amarilla indica que está abierto.',
+    sample:[...basic.slice(0,-1),part('switch','B11','B14',{closed:false}),part('wire','A14','N14')],
+    goal:(result,parts)=>result.mode==='lit' && parts.some((p)=>p.type==='switch'&&p.closed)
+  },
+  rails: {
+    label:'Cruzar la ranura',
+    prompt:'Agrega dos cables para completar el camino y encender el LED.',
+    hint:'Une E8 con F8 y J12 con −12 del riel superior. Prueba antes si E8 y F8 están unidos por dentro.',
+    sample:[...feed,part('res','C4','C8',{value:330}),part('led','H8','H12')],
+    goal:(result)=>result.mode==='lit'
+  },
+  free: {
+    label:'Modo libre',
+    prompt:'Arma tu propio circuito. ¿Puedes hacer que dos LED enciendan por separado?',
+    hint:'Pon un LED y una resistencia en cada rama entre + y −. Abre una rama y observa la otra.',
+    sample:[]
+  }
+};
+
+return { lessons };
+})();
+(() => {
+const {simulate,nodeOf,rows,columns}=CircuitCore;
+const {renderModel,holes}=CircuitModel;
+const {lessons}=CircuitLessons;
+
+const get = (id) => document.getElementById(id);
+const board = get('board');
+const tools = {
+  wire: ['Cable', '⌒', 'Toca los dos extremos del cable.'],
+  res: ['Resistencia', '▰', 'Elige el valor y toca dos orificios.'],
+  led: ['LED', '◉', 'Toca primero el ánodo (+) y luego el cátodo (−).'],
+  switch: ['Interruptor', '⎍', 'Toca dos orificios. Luego pulsa el interruptor para abrirlo o cerrarlo.'],
+  edit: ['Editar', '✎', 'Toca una pieza para moverla, cambiarla o quitarla.'],
+  probe: ['Probar unión', '⟷', 'Toca dos orificios para comprobar si están unidos dentro de la placa.']
+};
+const defaultView = {yaw:-.18,tilt:.67,top:false,orbit:false};
+let nextId = 1;
+let result = simulate([],false);
+const history = [];
+const state = {
+  ...defaultView, parts:[], tool:'wire', pending:null, powered:false,
+  lesson:'led', internals:false, cursor:'X+', active:null, moving:null
+};
+
+const holeName = (id) => holes.get(id).name;
+const selectedPart = () => state.parts.find(({id})=>id===state.active);
+const say = (message) => {
+  if(get('selection').textContent!==message) get('selection').textContent=message;
+};
+function save() {
+  history.push({parts:state.parts.map((part)=>({...part})),lesson:state.lesson,powered:state.powered});
+  if(history.length>50) history.shift();
+}
+function resetSelection() {
+  state.pending=null;
+  state.active=null;
+  state.moving=null;
+}
+function draw() {
+  renderModel({...state,result,pending:state.pending ?? (state.moving ? selectedPart()[state.moving] : null)});
+}
+function render(message) {
+  result=simulate(state.parts,state.powered);
+  get('power').setAttribute('aria-pressed',state.powered);
+  get('power').querySelector('b').textContent=state.powered?'Apagar 5 V':'Encender 5 V';
+  get('orbit').setAttribute('aria-pressed',state.orbit);
+  get('top').setAttribute('aria-pressed',state.top);
+  board.classList.toggle('orbit',state.orbit);
+  get('undo').disabled=!history.length;
+  get('clear').disabled=!state.parts.length;
+  get('res-options').hidden=state.tool!=='res';
+  for(const button of get('tools').querySelectorAll('button')) button.setAttribute('aria-pressed',button.dataset.tool===state.tool);
+  for(const button of get('lessons').querySelectorAll('button')) button.setAttribute('aria-pressed',button.dataset.lesson===state.lesson);
+  const lesson=lessons[state.lesson];
+  const achieved=lesson.goal?.(result,state.parts);
+  get('lesson').textContent=lesson.prompt;
+  get('hint').textContent=lesson.hint;
+  get('challenge-tag').textContent=achieved?'✓ LOGRADO':state.lesson==='free'?'MONTAJE LIBRE':'RETO';
+
+  const current=(result.current*1000).toLocaleString('es-CO',{maximumFractionDigits:1});
+  const reversed=[...result.leds.values()].some((reading)=>reading.reversed);
+  const descriptions={
+    off:'Fuente apagada',
+    short:'Cortocircuito · Revisa la unión entre + y −',
+    overload:'Corriente excesiva · Añade una resistencia en serie',
+    lit:'LED encendido · '+current+' mA',
+    flow:'Corriente total · '+current+' mA',
+    open:reversed?'LED invertido · Revisa + y −':'Sin corriente · Camino abierto'
+  };
+  const feedback=get('feedback');
+  const extra=reversed&&['lit','flow'].includes(result.mode)?' · Hay un LED invertido':'';
+  if(feedback.textContent!==descriptions[result.mode]+extra) feedback.textContent=descriptions[result.mode]+extra;
+  feedback.className=['short','overload'].includes(result.mode)||reversed?'warn':['lit','flow'].includes(result.mode)?'ok':'';
+  say(message ?? (state.orbit?'Arrastra en cualquier dirección. Pulsa Girar para volver al montaje.':
+    state.moving?'Elige el nuevo punto para '+holeName(selectedPart()[state.moving])+'.':
+    state.pending?'Primer punto: '+holeName(state.pending)+'. Toca el segundo.':tools[state.tool][2]));
+  renderInspector();
+  draw();
+}
+function renderInspector() {
+  const inspector=get('inspector');
+  const part=selectedPart();
+  inspector.hidden=!part;
+  if(!part) {
+    inspector.replaceChildren();
+    delete inspector.dataset.markup;
+    return;
+  }
+  const moveButton=(key,label)=>'<button data-move="'+key+'" aria-pressed="'+(state.moving===key)+'">Mover '+label+'</button>';
+  const labels=part.type==='led'?['ánodo (+)','cátodo (−)']:['extremo 1','extremo 2'];
+  const values=[220,330,1000];
+  const markup='<strong>'+tools[part.type][0]+' · '+holeName(part.a)+' → '+holeName(part.b)+'</strong>'+
+    moveButton('a',labels[0])+moveButton('b',labels[1])+
+    (part.type==='led'?'<button data-edit="flip">Invertir LED</button>':'')+
+    (part.type==='switch'?'<button data-edit="toggle">'+(part.closed?'Abrir':'Cerrar')+'</button>':'')+
+    (part.type==='res'?'<label>Valor <select id="edit-res">'+values.map((value)=>'<option value="'+value+'"'+(part.value===value?' selected':'')+'>'+value+' Ω</option>').join('')+'</select></label>':'')+
+    '<button data-edit="remove">Quitar</button>';
+  if(inspector.dataset.markup!==markup) {
+    const focused=document.activeElement;
+    const focusSelector=focused.id==='edit-res'?'#edit-res':focused.dataset.edit?'[data-edit="'+focused.dataset.edit+'"]':focused.dataset.move?'[data-move="'+focused.dataset.move+'"]':null;
+    inspector.innerHTML=markup;
+    inspector.dataset.markup=markup;
+    if(focusSelector) inspector.querySelector(focusSelector)?.focus({preventScroll:true});
+  }
+}
+function load(key,keepHistory=true) {
+  if(keepHistory) save();
+  state.lesson=key;
+  state.parts=lessons[key].sample.map((part)=>({...part,id:nextId++}));
+  state.powered=false;
+  state.tool='wire';
+  state.orbit=false;
+  resetSelection();
+  setHint(false);
+  render(state.parts.length?'Enciende la fuente para probar el montaje.':'Elige un componente para empezar.');
+}
+function setHint(open) {
+  get('hint').hidden=!open;
+  get('hint-button').setAttribute('aria-expanded',open);
+}
+function handleHole(id) {
+  state.cursor=id;
+  if(state.tool==='probe') {
+    if(id.startsWith('X')) {
+      say('Elige un orificio de la placa.');
+      return;
+    }
+    if(!state.pending) {
+      state.pending=id;
+      render('Selecciona otro orificio. Los resaltados comparten el mismo contacto interno.');
+      return;
+    }
+    if(id===state.pending) {
+      say('Elige un orificio distinto para compararlos.');
+      return;
+    }
+    const connected=nodeOf(state.pending)===nodeOf(id);
+    const first=holeName(state.pending);
+    state.pending=null;
+    render(first+' y '+holeName(id)+(connected?' sí comparten contacto interno.':' tienen contactos internos separados.'));
+    return;
+  }
+  const part=selectedPart();
+  if(state.tool==='edit'&&!state.moving) {
+    say('Toca el cuerpo de una pieza o un cable para editarlo.');
+    return;
+  }
+  const type=state.moving?part.type:state.tool;
+  const terminal=id.startsWith('X');
+  if(terminal&&type!=='wire') {
+    say('Usa un cable para conectar la fuente.');
+    return;
+  }
+  if(id===state.pending || (state.moving && id===part[state.moving])) {
+    state.pending=null;
+    state.moving=null;
+    render('Selección cancelada.');
+    return;
+  }
+  if(state.moving&&id===part[state.moving==='a'?'b':'a']) {
+    say('Elige un punto distinto del otro extremo.');
+    return;
+  }
+  if(!terminal&&state.parts.some((piece)=>piece.a===id||piece.b===id)) {
+    say('Orificio ocupado. Prueba otro del mismo grupo.');
+    return;
+  }
+  if(state.moving) {
+    save();
+    part[state.moving]=id;
+    state.moving=null;
+    render(nodeOf(part.a)===nodeOf(part.b)?'Pieza movida. Los extremos comparten contacto interno.':'Extremo movido.');
+    return;
+  }
+  if(!state.pending) {
+    state.pending=id;
+    render();
+    return;
+  }
+  if(state.parts.length>=30) {
+    state.pending=null;
+    render('Límite de 30 piezas. Quita alguna para continuar.');
+    return;
+  }
+  const a=state.pending;
+  const newPart={type,a,b:id,id:nextId++};
+  if(type==='res') newPart.value=Number(get('res-value').value);
+  if(type==='switch') newPart.closed=false;
+  save();
+  state.parts.push(newPart);
+  state.pending=null;
+  render(nodeOf(a)===nodeOf(id)?'Los dos puntos ya están unidos dentro de la placa.':'Componente colocado.');
+}
+function act(target) {
+  if(state.orbit) return;
+  const piece=target.closest('[data-part].interactive');
+  if(piece) {
+    const part=state.parts.find(({id})=>String(id)===piece.dataset.part);
+    if(state.tool==='edit') {
+      state.active=part.id;
+      state.moving=null;
+      render('Selecciona una acción para esta pieza.');
+    } else if(part.type==='switch') {
+      save();
+      part.closed=!part.closed;
+      render(part.closed?'Interruptor cerrado.':'Interruptor abierto.');
+    }
+    return;
+  }
+  const hole=target.closest('[data-hole]');
+  if(hole) handleHole(hole.dataset.hole);
+}
+get('tools').innerHTML=Object.entries(tools).map(([key,[label,icon]])=>'<button type="button" data-tool="'+key+'"><span aria-hidden="true" class="symbol '+key+'">'+icon+'</span>'+label+'</button>').join('');
+get('lessons').innerHTML=Object.entries(lessons).map(([key,{label}])=>'<button type="button" data-lesson="'+key+'">'+label+'</button>').join('');
+get('tools').addEventListener('click',(event)=>{
+  const key=event.target.closest('button')?.dataset.tool;
+  if(!key) return;
+  state.tool=key;
+  state.orbit=false;
+  resetSelection();
+  render();
+});
+get('lessons').addEventListener('click',(event)=>{
+  const key=event.target.closest('button')?.dataset.lesson;
+  if(key) load(key);
+});
+get('hint-button').addEventListener('click',()=>setHint(get('hint').hidden));
+get('power').addEventListener('click',()=>{
+  state.powered=!state.powered;
+  render();
+});
+get('undo').addEventListener('click',()=>{
+  const previous=history.pop();
+  if(previous.lesson!==state.lesson) setHint(false);
+  Object.assign(state,previous);
+  resetSelection();
+  render('Último cambio deshecho.');
+});
+get('clear').addEventListener('click',()=>load('free'));
+get('inspector').addEventListener('click',(event)=>{
+  const button=event.target.closest('button');
+  const part=selectedPart();
+  if(!button||!part) return;
+  if(button.dataset.move) {
+    state.moving=state.moving===button.dataset.move?null:button.dataset.move;
+    if(state.moving) state.cursor=part[state.moving];
+    render();
+    if(state.moving) {
+      board.querySelector('[data-hole="'+state.cursor+'"]').focus({preventScroll:true});
+    }
+    return;
+  }
+  save();
+  const action=button.dataset.edit;
+  if(action==='remove') {
+    state.parts=state.parts.filter(({id})=>id!==part.id);
+    resetSelection();
+  } else {
+    if(action==='flip') [part.a,part.b]=[part.b,part.a];
+    if(action==='toggle') part.closed=!part.closed;
+    state.moving=null;
+  }
+  render(action==='flip'?'Polaridad invertida.':action==='remove'?'Componente retirado.':'Interruptor '+(part.closed?'cerrado.':'abierto.'));
+  if(action==='remove') get('tools').querySelector('[data-tool="edit"]').focus();
+});
+get('inspector').addEventListener('change',(event)=>{
+  if(event.target.id!=='edit-res') return;
+  save();
+  selectedPart().value=Number(event.target.value);
+  render('Valor de resistencia actualizado.');
+});
+get('internals').addEventListener('change',(event)=>{
+  state.internals=event.target.checked;
+  draw();
+});
+get('top').addEventListener('click',()=>{
+  state.top=!state.top;
+  state.orbit=false;
+  render();
+});
+function setZoom(zoom) {
+  const viewport=board.parentElement;
+  viewport.classList.toggle('zoomed',zoom);
+  const button=get('zoom');
+  button.setAttribute('aria-pressed',zoom);
+  button.setAttribute('aria-label',zoom?'Reducir placa':'Ampliar placa');
+  button.title=zoom?'Reducir placa':'Ampliar placa';
+  button.textContent=zoom?'−':'＋';
+}
+get('zoom').addEventListener('click',()=>{
+  const zoom=!board.parentElement.classList.contains('zoomed');
+  setZoom(zoom);
+  if(zoom) say('Desliza a los lados para recorrer la placa ampliada.');
+});
+get('reset-view').addEventListener('click',()=>{
+  setZoom(false);
+  Object.assign(state,defaultView);
+  render('Vista restaurada. Arrastra el modelo para girarlo.');
+});
+get('orbit').addEventListener('click',()=>{
+  state.orbit=!state.orbit;
+  if(state.orbit) state.top=false;
+  render();
+});
+get('orbit').addEventListener('keydown',(event)=>{
+  if(!state.orbit||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
+  event.preventDefault();
+  rotate(event.key==='ArrowRight'?18:event.key==='ArrowLeft'?-18:0,event.key==='ArrowUp'?18:event.key==='ArrowDown'?-18:0);
+});
+let frame=0;
+function rotate(dx,dy) {
+  state.top=false;
+  get('top').setAttribute('aria-pressed','false');
+  state.yaw=(state.yaw+dx*.009)%(Math.PI*2);
+  state.tilt=Math.max(.35,Math.min(1.48,state.tilt+dy*.008));
+  if(!frame) frame=requestAnimationFrame(()=>{
+    frame=0;
+    draw();
+  });
+}
+let drag=null;
+let suppressClick=false;
+board.addEventListener('pointerdown',(event)=>{
+  if(!event.isPrimary || event.button!==0) return;
+  suppressClick=false;
+  drag={id:event.pointerId,x:event.clientX,y:event.clientY,started:false};
+});
+board.addEventListener('pointermove',(event)=>{
+  if(!drag||drag.id!==event.pointerId) return;
+  const dx=event.clientX-drag.x;
+  const dy=drag.y-event.clientY;
+  if(!drag.started) {
+    if(Math.hypot(dx,dy)<6) return;
+    board.setPointerCapture(event.pointerId);
+    drag.started=true;
+    suppressClick=true;
+    board.classList.add('drag');
+  }
+  rotate(dx,dy);
+  drag.x=event.clientX;
+  drag.y=event.clientY;
+});
+function release(event) {
+  if(drag?.id!==event.pointerId) return;
+  drag=null;
+  board.classList.remove('drag');
+}
+for(const name of ['pointerup','pointercancel','lostpointercapture']) board.addEventListener(name,release);
+board.addEventListener('pointerleave',(event)=>{
+  if(!drag?.started) release(event);
+});
+board.addEventListener('click',(event)=>{
+  if(!suppressClick) act(event.target);
+  suppressClick=false;
+});
+board.addEventListener('keydown',(event)=>{
+  const target=event.target;
+  const hole=target.dataset.hole;
+  if(event.key==='Enter'||event.key===' ') {
+    event.preventDefault();
+    act(target);
+  }
+  if(event.key==='Escape') {
+    resetSelection();
+    render();
+  }
+  if(!hole||!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) return;
+  event.preventDefault();
+  let destination;
+  if(hole.startsWith('X')) {
+    destination=event.key==='ArrowRight'?(hole==='X+'?'C1':'H1'):event.key==='ArrowUp'?'X+':event.key==='ArrowDown'?'X-':hole;
+  } else {
+    const row=rows.findIndex(([letter])=>letter===hole[0]);
+    const col=Number(hole.slice(1));
+    const dy=event.key==='ArrowUp'?-1:event.key==='ArrowDown'?1:0;
+    const dx=event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0;
+    destination=col===1&&dx===-1?(row<7?'X+':'X-'):rows[Math.max(0,Math.min(rows.length-1,row+dy))][0]+Math.min(columns,col+dx);
+  }
+  state.cursor=destination;
+  target.setAttribute('tabindex','-1');
+  const next=board.querySelector('[data-hole="'+destination+'"]');
+  next.setAttribute('tabindex','0');
+  next.focus();
+});
+load('led',false);
+new ResizeObserver(draw).observe(board);
+
+})();
+
+</script>
+</body></html>
